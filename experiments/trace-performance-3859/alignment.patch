@@ -1,0 +1,5 @@
+--- a/opentelemetry-sdk/src/trace/tracer.rs
++++ b/opentelemetry-sdk/src/trace/tracer.rs
+@@ -27,1 +27,2 @@
++#[repr(align(64))]
+ struct SdkTracerInner {
