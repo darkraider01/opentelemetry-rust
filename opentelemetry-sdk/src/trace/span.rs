@@ -2046,7 +2046,7 @@ mod tests {
     }
 
     #[test]
-    fn concurrent_lazy_scope_initialization() {
+    fn concurrent_non_recording_scope_access() {
         use crate::trace::Sampler;
         use opentelemetry::InstrumentationScope;
         use std::sync::Barrier;

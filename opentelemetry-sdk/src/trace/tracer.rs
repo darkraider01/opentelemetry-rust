@@ -17,7 +17,7 @@ use opentelemetry::{
     Context, InstrumentationScope, KeyValue, TraceId,
 };
 use std::fmt;
-use std::sync::{Arc, OnceLock};
+use std::sync::Arc;
 
 /// `Tracer` implementation to create and manage spans
 #[derive(Clone)]
@@ -26,9 +26,8 @@ pub struct SdkTracer {
 }
 
 struct SdkTracerInner {
-    scope: InstrumentationScope,
+    scope: Arc<InstrumentationScope>,
     provider: SdkTracerProvider,
-    non_recording_scope: OnceLock<Arc<InstrumentationScope>>,
 }
 
 impl fmt::Debug for SdkTracer {
@@ -47,9 +46,8 @@ impl SdkTracer {
     pub(crate) fn new(scope: InstrumentationScope, provider: SdkTracerProvider) -> Self {
         SdkTracer {
             inner: Arc::new(SdkTracerInner {
-                scope,
+                scope: Arc::new(scope),
                 provider,
-                non_recording_scope: OnceLock::new(),
             }),
         }
     }
@@ -68,15 +66,10 @@ impl SdkTracer {
     /// Detached instrumentation scope for non-recording spans.
     ///
     /// Non-recording spans must not retain the provider, allowing automatic provider
-    /// shutdown when all recording spans and tracers are dropped. This allocates and
-    /// caches a detached `Arc<InstrumentationScope>` on first non-recording span creation.
+    /// shutdown when all recording spans and tracers are dropped.
     #[inline]
     pub(crate) fn non_recording_scope(&self) -> Arc<InstrumentationScope> {
-        Arc::clone(
-            self.inner
-                .non_recording_scope
-                .get_or_init(|| Arc::new(self.inner.scope.clone())),
-        )
+        Arc::clone(&self.inner.scope)
     }
 
     fn build_recording_span(
