@@ -25,6 +25,7 @@ pub struct SdkTracer {
     inner: Arc<SdkTracerInner>,
 }
 
+#[repr(align(32))]
 struct SdkTracerInner {
     scope: Arc<InstrumentationScope>,
     provider: SdkTracerProvider,
